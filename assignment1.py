@@ -7,15 +7,16 @@ Original file is located at
     https://colab.research.google.com/drive/1hqlABys-cn5TKJFS3Lpuc4Kqm8RLkE2I
 """
 
-!pip install pandas numpy statsmodels pygam
-
 import pandas as pd
+from pygam import LinearGAM, s
+import numpy as np
 
 train_url = "https://github.com/dustywhite7/econ8310-assignment1/raw/main/assignment_data_train.csv"
 train_data = pd.read_csv(train_url)
 
 test_url = "https://github.com/dustywhite7/econ8310-assignment1/raw/main/assignment_data_test.csv"
 test_data = pd.read_csv(test_url)
+
 
 train_data['Timestamp'] = pd.to_datetime(train_data['Timestamp'])
 test_data['Timestamp'] = pd.to_datetime(test_data['Timestamp'])
@@ -31,13 +32,8 @@ test_data['month'] = test_data['Timestamp'].dt.month
 
 test_data['trips'] = 0
 
-from pygam import LinearGAM, s
-import numpy as np
-
 X_train = train_data[['month', 'day_of_week', 'hour']].values
 y_train = train_data['trips'].values
 
 model = LinearGAM(s(0) + s(1) + s(2)).gridsearch(X_train, y_train)
 modelFit = model
-
-!pip install pygam
