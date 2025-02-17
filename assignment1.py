@@ -11,27 +11,27 @@ from pygam import LinearGAM, s
 import pandas as pd
 import numpy as np
 
-# Load datasets
+# Load training and test datasets
 train_data = pd.read_csv("/content/assignment_data_train.csv")
 test_data = pd.read_csv("/content/assignment_data_test.csv")
 
-# Extract day of the week and adjust hour values
+# Extract day of the week and modify hour values
 for df in [train_data, test_data]:
     df['day_of_week_num'] = pd.to_datetime(df['Timestamp']).dt.weekday + 1
     df['hour_adjusted'] = df['hour'] + 1
 
-# Prepare training data
+# Define features and target variable
 X_train = train_data[['month', 'day_of_week_num', 'hour_adjusted']].values
 y_train = train_data['trips'].values
 
-# Build and train the model
-gam_model = LinearGAM(s(0) + s(1) + s(2)).gridsearch(X_train, y_train)
+# Train the model and store it in modelFit
+modelFit = LinearGAM(s(0) + s(1) + s(2)).gridsearch(X_train, y_train)
 
-# Prepare test data for predictions
+# Prepare test data and make predictions
 X_test = test_data[['month', 'day_of_week_num', 'hour_adjusted']].values
-test_data['trips'] = gam_model.predict(X_test)
+test_data['trips'] = modelFit.predict(X_test)
 
-# Extract predictions
+# Extract predicted values
 predicted_trips = test_data['trips'].values
 
 !pip install pygam
