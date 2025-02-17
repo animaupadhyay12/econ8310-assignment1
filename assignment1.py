@@ -13,7 +13,7 @@ from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 # Load the training and test data
 train = pd.read_csv('/assignment_data_train.csv')
-test = pd.read_csv('/assignment_data_train.csv')
+test = pd.read_csv('/assignment_data_test.csv')
 
 # Remove timestamp column (not needed for forecasting)
 if 'Timestamp' in train.columns:
