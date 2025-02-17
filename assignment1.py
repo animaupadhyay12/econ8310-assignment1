@@ -14,18 +14,12 @@ test = pd.read_csv('/content/sample_data/assignment_data_test.csv')
 
 train.head()
 
-
-
 import statsmodels.api as sm
-
 
 x = train.drop(['trips', 'Timestamp'], axis = 1)
 y = train[['trips']]
 model = sm.OLS(endog = y, exog = x)
 modelFit = model.fit()
-
-# model = sm.OLS(endog = y, exog = x)
-# modelFit = model.fit()
 
 x_test = test.drop(['Timestamp'], axis = 1)
 
