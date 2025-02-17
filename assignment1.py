@@ -8,22 +8,49 @@ Original file is located at
 """
 
 import pandas as pd
+import numpy as np
+from statsmodels.tsa.statespace.varmax import VARMAX
 
-test = pd.read_csv('/content/assignment_data_test.csv')
+# Load the training and test data from the correct directory
 train = pd.read_csv('/content/assignment_data_train.csv')
+test = pd.read_csv('/content/assignment_data_test.csv')
 
-train.head()
+# Remove timestamp column (if present)
+if 'Timestamp' in train.columns:
+    train = train.drop(columns=['Timestamp'])
+if 'Timestamp' in test.columns:
+    test = test.drop(columns=['Timestamp'])
 
-import statsmodels.api as sm
+# Ensure all columns are numeric
+train = train.apply(pd.to_numeric, errors='coerce')
+test = test.apply(pd.to_numeric, errors='coerce')
 
-x = train.drop(['trips', 'Timestamp'], axis = 1)
-y = train[['trips']]
-model = sm.OLS(endog = y, exog = x)
-modelFit = model.fit()
+# Identify and drop constant columns (columns with only one unique value)
+constant_cols = [col for col in train.columns if train[col].nunique() == 1]
+train = train.drop(columns=constant_cols)
+test = test.drop(columns=constant_cols, errors='ignore')
 
-x_test = test.drop(['Timestamp'], axis = 1)
+# Drop missing values
+train = train.dropna()
+test = test.dropna()
 
-pred = modelFit.predict(x_test)
+# DIFFERENCING: Ensure stationarity
+train_diff = train.diff().dropna()
 
-print(modelFit.summary())
+# Fit the VARMA model (VARMAX in statsmodels)
+model = VARMAX(train_diff, order=(1, 1), enforce_stationarity=False, enforce_invertibility=False)
+modelFit = model.fit(disp=False)
+
+# Forecast for 744 hours
+pred_diff = modelFit.forecast(steps=744)
+
+# Convert predictions back to original scale
+last_values = train.iloc[-1]  # Get last known values before differencing
+pred = pred_diff.cumsum() + last_values['trips']
+
+# Convert predictions into DataFrame
+pred_df = pd.DataFrame(pred, columns=['trips'])
+
+# Save predictions
+pred_df.to_csv('/content/predictions_varma.csv', index=False)
 
