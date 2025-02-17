@@ -7,21 +7,16 @@ Original file is located at
     https://colab.research.google.com/drive/1lG5h-EsvS6gDJD1z0u_NMyFPCE7XGmzv
 """
 
-from google.colab import drive
-drive.mount('/content/drive')
-
-# Mount Google Drive
-from google.colab import drive
-drive.mount('/content/drive')
-
 import pandas as pd
 import numpy as np
 from statsmodels.tsa.statespace.varmax import VARMAX
 
-
 # Load the training and test data
-train = pd.read_csv("/content/drive/MyDrive/Colab Notebooks/assignment_data_train.csv")
-test = pd.read_csv("/content/drive/MyDrive/Colab Notebooks/assignment_data_test.csv")
+train_path = "/content/assignment_data_train.csv"  # Update with correct path if needed
+test_path = "/content/assignment_data_test.csv"    # Update with correct path if needed
+
+train = pd.read_csv(train_path)
+test = pd.read_csv(test_path)
 
 # Remove timestamp column if present
 if 'Timestamp' in train.columns:
@@ -42,11 +37,11 @@ test = test.drop(columns=constant_cols, errors='ignore')
 train = train.dropna()
 test = test.dropna()
 
-# Differencing to ensure stationarity
+# Ensure stationarity (Differencing)
 train_diff = train.diff().dropna()
 
 # Fit the VARMA model (using VARMAX in statsmodels)
-model = VARMAX(train_diff, order=(1, 1), enforce_stationarity=False, enforce_invertibility=False)
+model = VARMAX(train_diff, order=(1, 0), enforce_stationarity=True, enforce_invertibility=True)
 
 # Fit the model
 modelFit = model.fit(disp=False)
@@ -61,8 +56,8 @@ pred = pred_diff.cumsum() + last_values['trips']
 # Convert predictions into DataFrame
 pred_df = pd.DataFrame(pred, columns=['trips'])
 
-# Save predictions to Google Drive
-output_path = "/content/drive/My Drive/predictions_varma.csv"
+# Save predictions
+output_path = "predictions_varma.csv"
 pred_df.to_csv(output_path, index=False)
 
 print(f"VARMA model executed successfully. Predictions saved as '{output_path}'.")
