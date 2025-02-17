@@ -11,18 +11,18 @@ import pandas as pd
 import numpy as np
 from pygam import LinearGAM, s
 
-# Load data
+
 train_url = "https://github.com/dustywhite7/econ8310-assignment1/raw/main/assignment_data_train.csv"
 test_url = "https://github.com/dustywhite7/econ8310-assignment1/raw/main/assignment_data_test.csv"
 
 train_data = pd.read_csv(train_url)
 test_data = pd.read_csv(test_url)
 
-# Convert timestamps
+
 train_data['Timestamp'] = pd.to_datetime(train_data['Timestamp'])
 test_data['Timestamp'] = pd.to_datetime(test_data['Timestamp'])
 
-# Extract features
+
 train_data['day_of_week'] = train_data['Timestamp'].dt.weekday + 1
 train_data['hour'] = train_data['Timestamp'].dt.hour
 train_data['month'] = train_data['Timestamp'].dt.month
@@ -31,19 +31,19 @@ test_data['day_of_week'] = test_data['Timestamp'].dt.weekday + 1
 test_data['hour'] = test_data['Timestamp'].dt.hour
 test_data['month'] = test_data['Timestamp'].dt.month
 
-# Placeholder for predictions
+
 test_data['trips'] = 0
 
-# Train GAM Model
+
 X_train = train_data[['month', 'day_of_week', 'hour']].values
 y_train = train_data['trips'].values
 
 model = LinearGAM(s(0) + s(1) + s(2)).gridsearch(X_train, y_train)
 
-# Store fitted model
+
 modelFit = model
 
-# Make Predictions
+
 X_test = test_data[['month', 'day_of_week', 'hour']].values
 test_data['trips'] = modelFit.predict(X_test)
 pred = test_data['trips'].values
