@@ -45,5 +45,3 @@ pred_df = pd.DataFrame(pred, columns=['trips'])
 # Print model summary
 print(modelFit.summary())
 
-!pip install pygam
-!pip install prophet
