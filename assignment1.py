@@ -7,31 +7,37 @@ Original file is located at
     https://colab.research.google.com/drive/1hqlABys-cn5TKJFS3Lpuc4Kqm8RLkE2I
 """
 
-from pygam import LinearGAM, s
+!pip install pandas numpy statsmodels pygam
+
 import pandas as pd
+
+train_url = "https://github.com/dustywhite7/econ8310-assignment1/raw/main/assignment_data_train.csv"
+train_data = pd.read_csv(train_url)
+
+test_url = "https://github.com/dustywhite7/econ8310-assignment1/raw/main/assignment_data_test.csv"
+test_data = pd.read_csv(test_url)
+
+train_data['Timestamp'] = pd.to_datetime(train_data['Timestamp'])
+test_data['Timestamp'] = pd.to_datetime(test_data['Timestamp'])
+
+train_data['day_of_week'] = train_data['Timestamp'].dt.weekday + 1
+train_data['hour'] = train_data['Timestamp'].dt.hour
+train_data['month'] = train_data['Timestamp'].dt.month
+
+test_data['day_of_week'] = test_data['Timestamp'].dt.weekday + 1
+test_data['hour'] = test_data['Timestamp'].dt.hour
+test_data['month'] = test_data['Timestamp'].dt.month
+
+
+test_data['trips'] = 0
+
+from pygam import LinearGAM, s
 import numpy as np
 
-# Load training and test datasets
-train_data = pd.read_csv("/content/assignment_data_train.csv")
-test_data = pd.read_csv("/content/assignment_data_test.csv")
-
-# Extract day of the week and modify hour values
-for df in [train_data, test_data]:
-    df['day_of_week_num'] = pd.to_datetime(df['Timestamp']).dt.weekday + 1
-    df['hour_adjusted'] = df['hour'] + 1
-
-# Define features and target variable
-X_train = train_data[['month', 'day_of_week_num', 'hour_adjusted']].values
+X_train = train_data[['month', 'day_of_week', 'hour']].values
 y_train = train_data['trips'].values
 
-# Train the model and store it in modelFit
-modelFit = LinearGAM(s(0) + s(1) + s(2)).gridsearch(X_train, y_train)
-
-# Prepare test data and make predictions
-X_test = test_data[['month', 'day_of_week_num', 'hour_adjusted']].values
-test_data['trips'] = modelFit.predict(X_test)
-
-# Extract predicted values
-predicted_trips = test_data['trips'].values
+model = LinearGAM(s(0) + s(1) + s(2)).gridsearch(X_train, y_train)
+modelFit = model
 
 !pip install pygam
